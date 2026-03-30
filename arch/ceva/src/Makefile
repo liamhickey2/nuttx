@@ -114,9 +114,10 @@ VPATH += $(ARCH_SUBDIR)
 VPATH := $(patsubst %,:$(SRCDIR)$(DELIM)%,$(VPATH))
 VPATH += :$(call CONVERT_PATH,$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)chip)
 
+vpath nuttx$(EXEEXT) $(TOPDIR)
+
 all: $(HEAD_OBJ) $(BIN)
 
-.PHONY: board$(DELIM)libboard$(LIBEXT)
 
 $(sort $(AOBJS) $(UAOBJS) $(HEAD_OBJ)): %$(OBJEXT): %.S
 	$(call ASSEMBLE, $<, $@)
@@ -130,13 +131,17 @@ $(BIN) $(KBIN): $(OBJS)
 $(UBIN): $(UOBJS)
 	$(call ARCHIVE, $@, $(UOBJS))
 
-board$(DELIM)libboard$(LIBEXT):
+board$(DELIM)libboard$(LIBEXT): FORCE
 ifeq ($(CONFIG_ARCH_XC5),y)
 	$(Q) if [ ! -L "$(CROSSDEV)/cevaxccc-xdrv" ]; then \
 		ln -sf "$(CROSSDEV)/cevaxccc-drv"  "$(CROSSDEV)/cevaxccc-xdrv";\
 	fi
 endif
 	$(Q) $(MAKE) -C board TOPDIR="$(TOPDIR)" libboard$(LIBEXT) EXTRADEFINES=$(EXTRADEFINES)
+
+.PHONY: FORCE
+
+FORCE:
 
 nuttx$(EXEEXT): $(HEAD_OBJ) board$(DELIM)libboard$(LIBEXT) $(LDSCRIPT)
 	$(Q) echo "LD: nuttx"

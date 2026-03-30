@@ -77,9 +77,10 @@ endif
 
 VPATH = chip:common:$(ARCH_SUBDIR)
 
+vpath nuttx$(EXEEXT) $(TOPDIR)
+
 all: $(HEAD_OBJ) libarch$(LIBEXT)
 
-.PHONY: board/libboard$(LIBEXT)
 
 $(AOBJS) $(HEAD_OBJ): %$(OBJEXT): %.S
 	$(call ASSEMBLE, $<, $@)
@@ -90,8 +91,12 @@ $(COBJS): %$(OBJEXT): %.c
 libarch$(LIBEXT): $(OBJS)
 	$(call ARCHIVE, $@, $(OBJS))
 
-board/libboard$(LIBEXT):
+board/libboard$(LIBEXT): FORCE
 	$(Q) $(MAKE) -C board libboard$(LIBEXT) EXTRAFLAGS="$(EXTRAFLAGS)"
+
+.PHONY: FORCE
+
+FORCE:
 
 nuttx$(EXEEXT): $(HEAD_OBJ) board/libboard$(LIBEXT) $(ARCHSCRIPT)
 	$(Q) $(LD) --entry=__start $(LDFLAGS) $(LIBPATHS) $(EXTRA_LIBPATHS) \

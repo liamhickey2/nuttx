@@ -103,9 +103,10 @@ else # ifeq ($(CONFIG_ARCH_TOOLCHAIN_GNU),y)
   VPATH += $(ARCH_SUBDIR)$(DELIM)gnu
 endif
 
+vpath nuttx$(EXEEXT) $(TOPDIR)
+
 all: $(HEAD_OBJ) $(BIN)
 
-.PHONY: board$(DELIM)libboard$(LIBEXT)
 
 $(AOBJS) $(UAOBJS) $(HEAD_OBJ): %$(OBJEXT): %.S
 	$(call ASSEMBLE, $<, $@)
@@ -124,8 +125,12 @@ endif
 $(KBIN): $(OBJS)
 	$(call ARCHIVE, $@, $(OBJS))
 
-board$(DELIM)libboard$(LIBEXT):
+board$(DELIM)libboard$(LIBEXT): FORCE
 	$(Q) $(MAKE) -C board libboard$(LIBEXT) EXTRAFLAGS="$(EXTRAFLAGS)"
+
+.PHONY: FORCE
+
+FORCE:
 
 nuttx$(EXEEXT): $(HEAD_OBJ) board$(DELIM)libboard$(LIBEXT) $(ARCHSCRIPT)
 	$(Q) echo "LD: nuttx"

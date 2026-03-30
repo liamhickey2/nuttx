@@ -57,9 +57,10 @@ OBJS = $(AOBJS) $(COBJS)
 
 VPATH = chip:common
 
+vpath nuttx$(EXEEXT) $(TOPDIR)
+
 all: $(HEAD_OBJ) libarch$(LIBEXT)
 
-.PHONY: board/libboard$(LIBEXT)
 
 ifeq ($(COMPILER),zneocc.exe)
 $(ASRCS) $(HEAD_ASRC): %$(ASMEXT): %.S
@@ -80,8 +81,12 @@ $(COBJS): %$(OBJEXT): %.c
 libarch$(LIBEXT): $(OBJS)
 	$(call ARCHIVE, $@, $(OBJS))
 
-board/libboard$(LIBEXT):
+board/libboard$(LIBEXT): FORCE
 	$(Q) $(MAKE) -C board libboard$(LIBEXT) EXTRAFLAGS="$(EXTRAFLAGS)"
+
+.PHONY: FORCE
+
+FORCE:
 
 ifeq ($(COMPILER),zneocc.exe)
 nuttx.linkcmd: $(LINKCMDTEMPLATE)
